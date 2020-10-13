@@ -1,0 +1,58 @@
+{
+  "generators": [
+    {
+      "name": "monthly-basis",
+      "type": "monthly",
+      "points": {
+        "january": 10,
+        "february": 11,
+        "march": 12,
+        "april": 13,
+        "may": 14,
+        "june": 16,
+        "july": 18,
+        "august": 18,
+        "september":20,
+        "october": 21,
+        "november": 22,
+        "december": 21
+      }
+    },
+    {
+      "name": "daily-variation",
+      "type": "daily",
+      "points": {
+        "00:00:00.000": -0.5,
+        "02:00:00.000": -0.2,
+        "04:00:00.000": 0.2,
+        "06:00:00.000": -0.3,
+        "08:00:00.000": -0.1,
+        "10:00:00.000": -0.1,
+        "12:00:00.000": 0.5,
+        "14:00:00.000": 0.6,
+        "16:00:00.000": 0.8,
+        "18:00:00.000": 0.1,
+        "20:00:00.000": 0.4,
+        "22:00:00.000": 0.1
+      }
+    },
+    {
+      "name": "result",
+      "type": "aggregate",
+      "aggregator": "sum",
+      "generators": [
+        "monthly-basis",
+        "daily-variation"
+      ]
+    }
+  ],
+  "exported": [
+    {
+      "name": "CBK",
+      "generator": "result",
+      "frequency": 250
+    }
+  ],
+  "from": "2020-01-01 00:00:00.000",
+  "to": "2020-12-31 23:59:59.999"
+}
