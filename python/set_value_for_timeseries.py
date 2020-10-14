@@ -3,7 +3,7 @@ import sys
 import random
 from datetime import datetime, timedelta
 
-parser = argparse.ArgumentParser(description="Script for creating time series data")
+parser = argparse.ArgumentParser(description='Script for creating time series data')
 
 #start date, end date tick rate millis, outputfile
 
@@ -47,6 +47,14 @@ help='first dimension for timeseries'
 )
 
 parser.add_argument(
+'--second_dimension',
+type=str, 
+dest='second_dimension',
+required=True, 
+help='second dimension for timeseries'
+)
+
+parser.add_argument(
 '--start_value',
 type=int, 
 dest='start_value',
@@ -85,7 +93,8 @@ start_date = args.start_date
 end_date = args.end_date
 tick_rate = args.tick_rate
 delimiter = args.delimiter
-dimension = args.first_dimension
+first_dimension = args.first_dimension
+second_dimension = args.second_dimension
 current_value = args.start_value
 offset = args.offset
 output = sys.stdout if args.output is None else open(args.output + "_" + str(offset) + "_ts.csv",'w')
@@ -94,7 +103,7 @@ current_tick = start_date
 
 random.seed(random_seed)
 
-#will probably pull these out to a module/class, and assign variable number of arguments to the functions
+#will probably pull these out to a module/class
 
 shape_value = current_value
 
@@ -108,7 +117,7 @@ def get_next_offset_value(value, offset):
 
 
 while (current_tick < end_date):
-    output.write(f"{current_tick:%Y-%m-%d %H:%M:%S.%f}{delimiter}{dimension}{delimiter}{current_value}\n")
+    output.write(f"{current_tick:%Y-%m-%d %H:%M:%S.%f}{delimiter}{first_dimension}{delimiter}{second_dimension}{delimiter}{current_value}\n")
     current_tick = current_tick + timedelta(milliseconds=tick_rate)
     shape_value = get_next_shape_value(shape_value)
     current_value = get_next_offset_value(shape_value,offset)
