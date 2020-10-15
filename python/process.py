@@ -1,6 +1,24 @@
+import argparse
+import re
+from functools import reduce
+from operator import add, floordiv
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 from pyspark.sql.functions import col,expr,column
+
+parser = argparse.ArgumentParser(description='processor for ipu liquid products')
+
+parser.add_argument(
+'--ts_dir',
+type=str, 
+dest='ts_dir', 
+required=True,
+help='directory from which all files with _ts.csv in their name will be consumed'
+)
+
+args  = parser.parse_args()
+
+ts_dir = args.ts_dir
 
 hello_schema = StructType( [\
     StructField("TICK_TIME",TimestampType(),False),
@@ -11,11 +29,35 @@ hello_schema = StructType( [\
 
 spark = SparkSession.builder.appName("IPU Processor").getOrCreate()
 
-daily_ticks = spark.read.format("csv").option("delimiter","|").schema(hello_schema).load("/media/data/t1/hello*ts.csv")
-#print(str(daily_ticks.count()))
-print(str(daily_ticks.count()))
+daily_ticks = spark.read\
+    .format("csv")\
+        .option("delimiter","|")\
+            .schema(hello_schema)\
+                .load(f'{ts_dir}/*ts.csv')
 
-daily_ticks.groupBy('TICK_TIME','TICK_CODE').pivot('SOURCE_CODE').sum().show(20)
+daily_ticks_comparison = daily_ticks\
+    .groupBy('TICK_TIME','TICK_CODE')\
+        .pivot('SOURCE_CODE')\
+            .sum()\
+                .sort('TICK_TIME')
+
+daily_ticks_comparison.show(20)
+
+value_source_matcher = re.compile("vs_")
+ 
+value_sources = [c for c in daily_ticks_comparison.columns if value_source_matcher.match(c)]
+
+print(str(value_sources))
+
+ipu_value = daily_ticks_comparison\
+    .withColumn('summary',\
+        expr(f'(vs_A+vs_B+vs_C+vs_D+vs_E)//{str(len(value_sources))}'))
+
+#ipu_value.withColumn('IPU_Value','summary / 5').show(10)       
+
+#print(str(daily_ticks_comparison.columns))
+
+#daily_ticks.sort(col('TICK_TIME')).show(10)
 
 # daily_ticks.show(5)
 # daily_ticks.printSchema()
