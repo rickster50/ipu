@@ -1,10 +1,10 @@
 import argparse
 import re
-from functools import reduce
-from operator import add, floordiv
+import numpy as np
+import statistics as st
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
-from pyspark.sql.functions import col,expr,column
+from pyspark.sql.functions import col,expr,column,udf,array,lit
 
 parser = argparse.ArgumentParser(description='processor for ipu liquid products')
 
@@ -41,17 +41,35 @@ daily_ticks_comparison = daily_ticks\
             .sum()\
                 .sort('TICK_TIME')
 
-daily_ticks_comparison.show(20)
+#daily_ticks_comparison.show(20)
 
-value_source_matcher = re.compile("vs_")
- 
+value_source_matcher = re.compile("vs_") 
 value_sources = [c for c in daily_ticks_comparison.columns if value_source_matcher.match(c)]
+
+def get_mean_(*cols):
+    print(cols)
+    #print(type(cols))
+    #print(type(cols[0]))
+    print(list(zip(cols)))
+    
+    #for x in for y in cols
+    #print(str(x for x in cols if x is not None))
+    return 2.0 
+
+get_mean = udf(get_mean_,DoubleType())
 
 print(str(value_sources))
 
 ipu_value = daily_ticks_comparison\
-    .withColumn('summary',\
-        expr(f'(vs_A+vs_B+vs_C+vs_D+vs_E)//{str(len(value_sources))}'))
+    .withColumn('IPU_value',get_mean(array(value_sources)))
+
+
+ipu_value.show(20)
+
+
+#expr(f'(vs_A+vs_B+vs_C+vs_D+vs_E)/{str(len(value_sources))}'))
+
+
 
 #ipu_value.withColumn('IPU_Value','summary / 5').show(10)       
 
