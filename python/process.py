@@ -91,25 +91,5 @@ ipu_value = daily_ticks_comparison\
 ipu_value.show(20)
 
 
-#expr(f'(vs_A+vs_B+vs_C+vs_D+vs_E)/{str(len(value_sources))}'))
-
-
-
-#ipu_value.withColumn('IPU_Value','summary / 5').show(10)       
-
-#print(str(daily_ticks_comparison.columns))
-
-#daily_ticks.sort(col('TICK_TIME')).show(10)
-
-# daily_ticks.show(5)
-# daily_ticks.printSchema()
-
-# daily_ticks.sort(col('TICK_TIME')).show(10)
-
-# daily_ticks.describe().show()
-
-# daily_ticks.groupBy('TICK_TIME',TICK_CODE').pivot('SOURCE_CODE').sum().show(20)
-
-
 
 
