@@ -2,6 +2,7 @@ import argparse
 import re
 import numpy as np
 import statistics as st
+import decimal
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 from pyspark.sql.functions import col,expr,column,udf,array,lit
@@ -48,20 +49,43 @@ value_sources = [c for c in daily_ticks_comparison.columns if value_source_match
 
 def get_mean_(*cols):
     print(cols)
-    #print(type(cols))
-    #print(type(cols[0]))
-    print(list(zip(cols)))
-    
-    #for x in for y in cols
-    #print(str(x for x in cols if x is not None))
-    return 2.0 
+    x = st.mean([num for elem in cols for num in elem])
+    return round(float(x),2)
 
-get_mean = udf(get_mean_,DoubleType())
+get_mean = udf(get_mean_,FloatType())
 
-print(str(value_sources))
+def get_median_(*cols):
+
+    x = st.median([num for elem in cols for num in elem])
+    return round(float(x),2)
+
+get_median = udf(get_median_,FloatType())
+
+def get_median_(*cols):
+
+    x = st.median([num for elem in cols for num in elem])
+    return round(float(x),2)
+
+get_median = udf(get_median_,FloatType())
+
+def get_max_(*cols):
+    x = max([num for elem in cols for num in elem])
+    return round(float(x),2)
+
+get_max = udf(get_max_,FloatType())
+
+def get_min_(*cols):
+    x = min([num for elem in cols for num in elem])
+    return round(float(x),2)
+
+get_min = udf(get_min_,FloatType())
 
 ipu_value = daily_ticks_comparison\
-    .withColumn('IPU_value',get_mean(array(value_sources)))
+    .withColumn('IPU_mean',get_mean(array(value_sources)))\
+        .withColumn('IPU_med',get_median(array(value_sources)))\
+            .withColumn('IPU_max',get_max(array(value_sources)))\
+                .withColumn('IPU_min',get_median(array(value_sources)))\
+
 
 
 ipu_value.show(20)
