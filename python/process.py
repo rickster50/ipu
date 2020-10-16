@@ -42,8 +42,6 @@ daily_ticks_comparison = daily_ticks\
             .sum()\
                 .sort('TICK_TIME')
 
-#daily_ticks_comparison.show(20)
-
 value_source_matcher = re.compile("vs_") 
 value_sources = [c for c in daily_ticks_comparison.columns if value_source_matcher.match(c)]
 
@@ -53,13 +51,6 @@ def get_mean_(*cols):
     return round(float(x),2)
 
 get_mean = udf(get_mean_,FloatType())
-
-def get_median_(*cols):
-
-    x = st.median([num for elem in cols for num in elem])
-    return round(float(x),2)
-
-get_median = udf(get_median_,FloatType())
 
 def get_median_(*cols):
 
