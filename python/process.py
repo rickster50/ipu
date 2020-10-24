@@ -1,6 +1,6 @@
 import argparse
 import re
-import numpy as np
+import os
 import statistics as st
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
@@ -29,12 +29,18 @@ hello_schema = StructType( [\
 
 spark = SparkSession.builder.appName("IPU Processor").getOrCreate()
 
+
+#raw source consumption
 daily_ticks = spark.read\
     .format("csv")\
         .option("delimiter","|")\
             .schema(hello_schema)\
                 .load(f'{ts_dir}/*ts.csv')
 
+#data engineering pipeline
+
+
+#business pipeline
 daily_ticks_comparison = daily_ticks\
     .groupBy('TICK_TIME','TICK_CODE')\
         .pivot('SOURCE_CODE')\
@@ -45,14 +51,12 @@ value_source_matcher = re.compile("vs_")
 value_sources = [c for c in daily_ticks_comparison.columns if value_source_matcher.match(c)]
 
 def get_mean_(*cols):
-    print(cols)
     x = st.mean([num for elem in cols for num in elem])
     return round(float(x),2)
 
 get_mean = udf(get_mean_,FloatType())
 
 def get_median_(*cols):
-
     x = st.median([num for elem in cols for num in elem])
     return round(float(x),2)
 
@@ -77,8 +81,9 @@ ipu_value = daily_ticks_comparison\
                 .withColumn('IPU_min',get_median(array(value_sources)))\
 
 
+ipu_value.show(100)
+ipu_value.write.format('parquet').mode('overwrite').save(f'{os.environ["IPU_PT"]}/t1')
 
-ipu_value.show(20)
 
 
 
